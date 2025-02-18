@@ -3,38 +3,36 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
 const FlashCardEdits = () => {
-  const { id } = useParams();  // Get the flashcard ID from the URL params
+  const { id } = useParams();  
   const navigate = useNavigate();
   const [flashcard, setFlashcard] = useState({
     question: "",
     answer: "",
-    level: "",  // Add level in the initial state
+    level: "", 
   });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);  // Add loading state
+  const [loading, setLoading] = useState(true);  
 
   useEffect(() => {
     const fetchFlashcards = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/flashcards/all");
         
-        // Find the flashcard by comparing IDs
         const selectedFlashcard = response.data.find((card) => card._id === id);
         if (selectedFlashcard) {
           setFlashcard(selectedFlashcard);
         }
         
-        setLoading(false);  // Set loading to false after data is fetched
+        setLoading(false); 
       } catch (err) {
         console.error("Error fetching flashcards:", err);
         setError("Failed to fetch flashcard data.");
-        setLoading(false);  // Stop loading if there's an error
+        setLoading(false);  
       }
     };
     fetchFlashcards();
   }, [id]);
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -42,12 +40,12 @@ const FlashCardEdits = () => {
       const response = await axios.put(`http://localhost:5000/api/flashcards/update/${id}`, {
         question: flashcard.question,
         answer: flashcard.answer,
-        level: flashcard.level,  // Include level in the update
+        level: flashcard.level, 
       });
 
       if (response.status === 200) {
         alert("Flashcard updated successfully");
-        navigate("/flashcards");  // Navigate to the flashcards list
+        navigate("/flashcards");  
       }
     } catch (err) {
       console.error("Error updating flashcard:", err);
@@ -55,7 +53,6 @@ const FlashCardEdits = () => {
     }
   };
 
-  // Show loading spinner or form based on loading state
   if (loading) {
     return <p className="text-center text-white">Loading...</p>;
   }

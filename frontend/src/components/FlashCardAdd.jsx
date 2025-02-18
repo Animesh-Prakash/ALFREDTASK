@@ -1,35 +1,29 @@
 import React, { useState } from 'react';  
-import axios from 'axios'; // Import axios to send requests
+import axios from 'axios'; 
 
 const FlashCardAdd = () => {
-  // State to hold the question, answer, and selected level
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
-  const [level, setLevel] = useState(1); // Default level 1
+  const [level, setLevel] = useState(1); 
 
-  // Function to calculate the review date based on the selected level
   const calculateReviewDate = (level) => {
     const nextReviewDate = new Date();
-    const reviewDays = [1, 3, 7, 14, 30]; // Review intervals for each level (1-indexed)
+    const reviewDays = [1, 3, 7, 14, 30]; 
     nextReviewDate.setDate(nextReviewDate.getDate() + reviewDays[level - 1]); 
     return nextReviewDate;
   };
 
-  // Handle form submission and add a new flashcard
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form behavior
+    e.preventDefault(); 
 
-    // Check if the fields are filled out
     if (!question || !answer) {
       alert('Please fill in both fields!');
       return;
     }
 
-    // Calculate review date based on selected level
     const nextReviewDate = calculateReviewDate(level);
 
     try {
-      // Send a POST request to the backend with the flashcard details
       const response = await axios.post('http://localhost:5000/api/flashcards/add', { 
         question, 
         answer, 
@@ -38,10 +32,9 @@ const FlashCardAdd = () => {
       });
 
       alert('Flashcard added successfully!');
-      setQuestion(''); // Reset the input fields
+      setQuestion(''); 
       setAnswer('');
-      setLevel(1); // Reset level selection
-      console.log('Flashcard created:', response.data); // Optionally log the response
+      setLevel(1); 
     } catch (err) {
       console.error('Error adding flashcard:', err);
       alert('Failed to add flashcard');

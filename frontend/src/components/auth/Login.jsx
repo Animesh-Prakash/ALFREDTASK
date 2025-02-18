@@ -6,13 +6,13 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
-    setLoading(true); // Set loading to true while awaiting response
+    setError(""); 
+    setLoading(true); 
   
     if (!email || !password) {
       setError("Email and password are required.");
@@ -27,9 +27,9 @@ const Login = () => {
       });
   
       if (response.status === 200) {
-        localStorage.setItem("token", response.data.token); // Store token
-        localStorage.setItem("email", email); // Store email
-        navigate("/flashcards"); // Redirect after successful login
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("email", email); 
+        navigate("/flashcards"); 
       }
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
@@ -71,10 +71,10 @@ const Login = () => {
         <button
           type="submit"
           className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg"
-          disabled={loading}  // Disable button when loading
+          disabled={loading}  
         >
           {loading ? (
-            <span>Loading...</span>  // Loading text
+            <span>Loading...</span> 
           ) : (
             "Login"
           )}

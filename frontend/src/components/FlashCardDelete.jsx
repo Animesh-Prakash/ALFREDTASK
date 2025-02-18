@@ -4,9 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 const FlashCardDelete = () => {
   const [flashcards, setFlashcards] = useState([]);
-  const navigate = useNavigate();  // Use to navigate to the edit page
+  const navigate = useNavigate();  
 
-  // Fetch flashcards on component mount
   useEffect(() => {
     const fetchFlashcards = async () => {
       try {
@@ -19,11 +18,9 @@ const FlashCardDelete = () => {
     fetchFlashcards();
   }, []);
 
-  // Handle deleting a flashcard
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/flashcards/delete/${id}`);
-      // Filter out the deleted flashcard from the state
       setFlashcards(flashcards.filter(flashcard => flashcard._id !== id));
       alert("Flashcard deleted successfully");
     } catch (err) {
@@ -32,7 +29,6 @@ const FlashCardDelete = () => {
     }
   };
 
-  // Handle editing a flashcard (Navigate to edit page)
   const handleEdit = (id) => {
     navigate(`/edit/${id}`);
   };

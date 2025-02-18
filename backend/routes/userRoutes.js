@@ -11,17 +11,14 @@ router.post("/signup", async (req, res) => {
   console.log(req.body);
 
   try {
-    // Check if the email already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
     const newUser = new User({
       firstName,
       lastName,
@@ -29,7 +26,6 @@ router.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
-    // Save user
     await newUser.save();
 
     res.status(201).json({ message: "User created successfully" });
@@ -39,26 +35,22 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// Login Route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Check if user exists
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
 
-    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "999d",
     });
@@ -70,7 +62,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// User Profile Route (Protected)
 router.get("/userProfile", authenticateToken, async (req, res) => {
   try {
     const userEmail = req.header("userEmail");
@@ -89,7 +80,6 @@ router.get("/userProfile", authenticateToken, async (req, res) => {
   }
 });
 
-// User Profile by ID Route (Protected)
 router.get("/userProfile/:id", authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -103,7 +93,6 @@ router.get("/userProfile/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Update User Information (Protected)
 router.post("/userInformation", authenticateToken, async (req, res) => {
   const userData = req.body;
 

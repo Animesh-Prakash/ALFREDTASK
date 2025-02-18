@@ -2,8 +2,6 @@ const express = require('express');
 const Flashcard = require('../models/Flashcard');
 const router = express.Router();
 
-// Add a new flashcard
-// routes/flashcardRoutes.js
 router.post('/add', async (req, res) => {
     try {
         const { question, answer, level, nextReviewDate } = req.body;
@@ -16,18 +14,15 @@ router.post('/add', async (req, res) => {
             return res.status(400).json({ error: 'Please provide both question and answer.' });
         }
 
-        // Create a new flashcard instance
         const newFlashcard = new Flashcard({
             question,
             answer,
-            level: level || 1,  // Default to Box 1 if not provided
-            nextReviewDate: nextReviewDate || new Date(),  // Default to the current date if not provided
+            level: level || 1,  
+            nextReviewDate: nextReviewDate || new Date(),  
           });
 
-        // Save the flashcard to the database
         await newFlashcard.save();
 
-        // Return the newly created flashcard (with the UUID)
         res.status(201).json(newFlashcard);
     } catch (err) {
         console.error(err);
@@ -35,7 +30,6 @@ router.post('/add', async (req, res) => {
     }
 });
 
-// Get all flashcards
 router.get('/all', async (req, res) => {
   try {
     const flashcards = await Flashcard.find({});
@@ -47,15 +41,13 @@ router.get('/all', async (req, res) => {
 
 router.get('/all/:userId', async (req, res) => { 
   try {
-    // Assuming userId is a parameter in the URL
     const flashcards = await Flashcard.find({ userId: req.params.userId });
     
-    // If no flashcards are found, send an empty array
     if (!flashcards) {
       return res.status(404).json({ message: "No flashcards found for this user." });
     }
     
-    res.json(flashcards); // Send the list of flashcards
+    res.json(flashcards); 
   } catch (err) {
     console.error("Error fetching flashcards:", err);
     res.status(500).json({ error: err.message });
@@ -63,13 +55,15 @@ router.get('/all/:userId', async (req, res) => {
 });
 
 
-// Update flashcard level (Leitner System)
 router.put('/update/:id', async (req, res) => {
-    const { level, nextReviewDate } = req.body;
+    const {question, answer, level} = req.body;
+    console.log(question);
+    console.log(answer);
+    console.log(level);
     try {
         const updatedFlashcard = await Flashcard.findByIdAndUpdate(
           req.params.id,
-          { level, nextReviewDate },
+          { question, answer, level },
           { new: true }
         );
     
@@ -79,7 +73,6 @@ router.put('/update/:id', async (req, res) => {
       }
 });
 
-// Delete flashcard
 router.delete('/delete/:id', async (req, res) => {
   try {
     await Flashcard.findByIdAndDelete(req.params.id);

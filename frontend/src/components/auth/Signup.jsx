@@ -13,8 +13,8 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
-    setIsLoading(true); // Set loading to true while awaiting response
+    setError(""); 
+    setIsLoading(true); 
 
     try {
       const response = await axios.post("http://localhost:5000/api/auth/signup", {
@@ -25,7 +25,7 @@ const Signup = () => {
       });
       console.log(response);
       if (response.status === 201) {
-        navigate("/login"); // Redirect to login page after successful signup
+        navigate("/login"); 
         alert("User created successfully");
       }
     } catch (err) {

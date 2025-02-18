@@ -11,15 +11,12 @@ export const AuthProvider = ({ children }) => {
     const userEmail = localStorage.getItem("email");
 
     if (token && userEmail) {
-      console.log("Token found:", token);
-      console.log("User Email found:", userEmail);
 
       setIsAuthenticated(true);
       setEmail(userEmail);
     }
   }, []);
 
-  // Debugging: Log state after it updates
  
   return (
     <AuthContext.Provider value={{ isAuthenticated, email, setEmail, setIsAuthenticated }}>
