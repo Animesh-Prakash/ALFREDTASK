@@ -13,30 +13,31 @@ const Login = () => {
     e.preventDefault();
     setError(""); // Clear previous errors
     setLoading(true); // Set loading to true while awaiting response
-
-    // Basic client-side validation for empty fields
+  
     if (!email || !password) {
       setError("Email and password are required.");
       setLoading(false);
       return;
     }
-
+  
     try {
       const response = await axios.post("http://localhost:5000/api/auth/login", {
         email,
         password,
       });
-
+  
       if (response.status === 200) {
         localStorage.setItem("token", response.data.token); // Store token
-        navigate("/flashcards"); // Redirect to dashboard after successful login
+        localStorage.setItem("email", email); // Store email
+        navigate("/flashcards"); // Redirect after successful login
       }
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
+  
 
   return (
     <div className="max-w-md mx-auto my-16 p-8 bg-gray-800 rounded-lg shadow-lg">

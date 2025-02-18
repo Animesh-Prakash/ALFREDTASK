@@ -8,6 +8,7 @@ import Signup from './components/auth/Signup';
 import FlashCardDelete from './components/FlashCardDelete';
 import FlashCardEdit from './components/FlashCardEdits';
 import AdminDashboard from './components/AdminDashboard';
+import { AuthProvider } from './components/AuthContext';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,9 +22,9 @@ function App() {
   }, []);
 
   return (
-    <Router>
+    <AuthProvider>
+       <Router>
       <div className="mt-16">
-        <h1 className="text-2xl font-bold">Flashcard App</h1>
         <Routes>
           {/* Only allow access to flashcards if authenticated */}
           <Route 
@@ -62,6 +63,8 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </AuthProvider>
+   
   );
 }
 

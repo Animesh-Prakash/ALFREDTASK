@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const FlashCardDelete = () => {
   const [flashcards, setFlashcards] = useState([]);
@@ -34,7 +34,7 @@ const FlashCardDelete = () => {
 
   // Handle editing a flashcard (Navigate to edit page)
   const handleEdit = (id) => {
-    navigate(`/edit/${id}`);  // Redirect to the edit page of that flashcard
+    navigate(`/edit/${id}`);
   };
 
   return (

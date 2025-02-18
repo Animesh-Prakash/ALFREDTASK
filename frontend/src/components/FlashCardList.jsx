@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react"; 
 import axios from "axios";
-import io from "socket.io-client";
 import { Link } from "react-router-dom";
 
 const FlashcardList = () => {
+  const email = localStorage.getItem("email");
   const [flashcards, setFlashcards] = useState([]);
-  const [socket, setSocket] = useState(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flippedCard, setFlippedCard] = useState(null);
   const [attemptedCount, setAttemptedCount] = useState(0);
   const [knownCount, setKnownCount] = useState(0);
+  const [dontKnowCount, setDontKnowCount] = useState(0);
 
-  // States to track categorized flashcards
   const [masteredCount, setMasteredCount] = useState(0);
   const [reviewingCount, setReviewingCount] = useState(0);
   const [learningCount, setLearningCount] = useState(0);
@@ -22,18 +21,17 @@ const FlashcardList = () => {
         const response = await axios.get("http://localhost:5000/api/flashcards/all");
         let allFlashcards = response.data;
 
-        // Categorize flashcards
-        const today = new Date().toISOString().split('T')[0];
-        const mastered = allFlashcards.filter(card => card.level === 5);
-        const reviewing = allFlashcards.filter(card => new Date(card.nextReviewDate).toISOString().split('T')[0] <= today);
-        const learning = allFlashcards.filter(card => card.level < 5);
+        const today = new Date().toISOString().split("T")[0];
+        const mastered = allFlashcards.filter((card) => card.level === 5);
+        const reviewing = allFlashcards.filter(
+          (card) => new Date(card.nextReviewDate).toISOString().split("T")[0] <= today
+        );
+        const learning = allFlashcards.filter((card) => card.level < 5);
 
-        // Set categorized counts
         setMasteredCount(mastered.length);
         setReviewingCount(reviewing.length);
         setLearningCount(learning.length);
 
-        // Filter and sort the flashcards to show only those due today
         const dueFlashcards = reviewing.sort((a, b) => a.level - b.level);
         setFlashcards(dueFlashcards);
       } catch (err) {
@@ -42,75 +40,56 @@ const FlashcardList = () => {
     };
 
     fetchFlashcards();
-
-    // Initialize socket connection
-    const socketInstance = io(); // Connect to the server
-    setSocket(socketInstance);
-
-    socketInstance.on('message', (message) => {
-      console.log('Received message from server:', message);
-    });
-
-    // Cleanup on component unmount
-    return () => {
-      socketInstance.disconnect();
-    };
   }, []);
 
-  // Function to calculate next review date based on the level
   const calculateNextReviewDate = (level) => {
-    const reviewDays = [1, 3, 7, 14, 30]; // Review intervals per level
+    const reviewDays = [1, 3, 7, 14, 30]; 
     const nextDate = new Date();
     nextDate.setDate(nextDate.getDate() + reviewDays[level - 1]);
     return nextDate;
   };
 
-  // Function to handle correct or incorrect answers
   const handleAnswer = async (flashcardId, correct) => {
-    if (!socket) return;
-
     let updatedFlashcards = [...flashcards];
     let flashcard = updatedFlashcards[currentCardIndex];
 
     if (correct) {
-      flashcard.level = Math.min(flashcard.level + 1, 5); // Increase level (max 5)
-      setKnownCount(prev => prev + 1); // Count as known
+      flashcard.level = Math.min(flashcard.level + 1, 5); 
+      setKnownCount((prev) => prev + 1); 
     } else {
-      flashcard.level = 1; // Reset to level 1 if incorrect
+      flashcard.level = 1; 
+      setDontKnowCount((prev) => prev + 1); 
     }
 
-    // Update review date based on the new level
     flashcard.nextReviewDate = calculateNextReviewDate(flashcard.level);
 
-    // Send update to the backend
     try {
       await axios.put(`http://localhost:5000/api/flashcards/update/${flashcardId}`, {
         level: flashcard.level,
-        nextReviewDate: flashcard.nextReviewDate
+        nextReviewDate: flashcard.nextReviewDate,
       });
 
-      // Remove reviewed flashcard and move to next
       updatedFlashcards.splice(currentCardIndex, 1);
       setFlashcards(updatedFlashcards);
 
       if (currentCardIndex >= updatedFlashcards.length) {
-        setCurrentCardIndex(0); // Reset index if out of range
+        setCurrentCardIndex(0); 
       }
 
-      // Update attempted count
-      setAttemptedCount(prev => prev + 1);
+      setAttemptedCount((prev) => prev + 1);
 
-      // Update counts after answer is submitted
-      const today = new Date().toISOString().split('T')[0];
-      const mastered = updatedFlashcards.filter(card => card.level === 5);
-      const reviewing = updatedFlashcards.filter(card => new Date(card.nextReviewDate).toISOString().split('T')[0] <= today);
-      const learning = updatedFlashcards.filter(card => card.level < 5);
+      const today = new Date().toISOString().split("T")[0];
+      const mastered = updatedFlashcards.filter((card) => card.level === 5);
+      const reviewing = updatedFlashcards.filter(
+        (card) => new Date(card.nextReviewDate).toISOString().split("T")[0] <= today
+      );
+      const learning = updatedFlashcards.filter((card) => card.level < 5);
 
       setMasteredCount(mastered.length);
       setReviewingCount(reviewing.length);
       setLearningCount(learning.length);
     } catch (err) {
-      console.error('Error updating flashcard:', err);
+      console.error("Error updating flashcard:", err);
     }
   };
 
@@ -119,89 +98,115 @@ const FlashcardList = () => {
     setFlippedCard(flippedCard === cardId ? null : cardId);
   };
 
-  // Calculate progress percentages for today's due flashcards
   const totalFlashcards = reviewingCount;
   const attemptedPercentage = totalFlashcards === 0 ? 0 : (attemptedCount / totalFlashcards) * 100;
   const knownPercentage = totalFlashcards === 0 ? 0 : (knownCount / totalFlashcards) * 100;
+  const dontKnowPercentage = totalFlashcards === 0 ? 0 : (dontKnowCount / totalFlashcards) * 100;
 
   return (
-    <div className="text-white ">
+    <div className=" min-h-screen font-sans text-white">
       {/* Navbar */}
-      <nav className="w-[100%] bg-gray-800 p-4 fixed top-0 z-10">
-        <div className="  flex justify-between items-center">
-          <Link to="/" className="text-white text-2xl font-semibold">Flashcard App</Link>
-          <div className="space-x-4">
-            <Link to="/login" className="text-white">Login</Link>
-            <Link to="/signup" className="text-white">Sign Up</Link>
+      <nav className="w-full bg-gray-900 p-6 fixed top-0 left-0 right-0 z-10 shadow-xl rounded-b-lg">
+  <div className="flex justify-between items-center max-w-7xl mx-auto">
+    <Link to="/" className="text-white text-3xl font-semibold tracking-wide hover:text-pink-300 transition-all">
+      Flashcard Master
+    </Link>
+    <div className="space-x-6">
+      <Link
+        to="/login"
+        className="text-white bg-gradient-to-r from-teal-500 via-blue-600 to-indigo-700 py-2 px-6 rounded-lg hover:scale-105 transform transition-all font-semibold text-lg"
+      >
+        Login
+      </Link>
+      <Link
+        to="/signup"
+        className="text-white bg-gradient-to-r from-pink-500 via-red-600 to-yellow-600 py-2 px-6 rounded-lg hover:scale-105 transform transition-all font-semibold text-lg"
+      >
+        Sign Up
+      </Link>
+    </div>
+  </div>
+</nav>
+
+
+      <div className="mt-32 text-center">
+        <h1 className="text-5xl font-extrabold mb-8">Your Flashcards</h1>
+
+        {email === "animeshp1607@gmail.com" && (
+          <div className="mb-12">
+            <Link to="/add" className="text-xl text-pink-400 hover:text-pink-500 transition-all">
+              Add a new card
+            </Link>
+            <span className="mx-4 text-white">|</span>
+            <Link to="/delete" className="text-xl text-pink-400 hover:text-pink-500 transition-all">
+              Edit your flashcards
+            </Link>
           </div>
-        </div>
-      </nav>
-
-      <h1 className="text-4xl font-bold text-center mb-8">Flashcards</h1>
-
-      <div className="my-12 text-center flex flex-col items-center space-y-4">
-        <Link to="/add" className="text-lg font-semibold text-blue-500 hover:underline">
-          Add a new card here
-        </Link>
-        <Link to="/delete" className="text-lg font-semibold text-blue-500 hover:underline">
-          Edit here
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 gap-8 justify-items-center  mx-10 my-10">
-        {flashcards.length > 0 ? (
-          <div
-            key={flashcards[currentCardIndex]._id}
-            className="w-full h-[250px] md:w-[250px] lg:w-[800px] bg-gradient-to-br from-gray-800 to-gray-900 text-center flex flex-col items-center justify-center rounded-lg shadow-lg transform transition duration-300 ease-in-out relative overflow-hidden cursor-pointer"
-            onClick={() => handleCardClick(flashcards[currentCardIndex]._id)}
-          >
-            {flippedCard === flashcards[currentCardIndex]._id ? (
-              <div className="absolute w-full h-full flex items-center justify-center p-4 text-white bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg transform">
-                <div>
-                  <p className="text-lg">{flashcards[currentCardIndex].answer}</p>
-                  <div className="mt-4">
-                    <button
-                      onClick={() => handleAnswer(flashcards[currentCardIndex]._id, true)}
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
-                    >
-                      I know it
-                    </button>
-                    <button
-                      onClick={() => handleAnswer(flashcards[currentCardIndex]._id, false)}
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                      I don't know it
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="absolute w-full h-full flex items-center justify-center p-4">
-                <p className="text-2xl md:text-3xl font-semibold mb-4">{flashcards[currentCardIndex].question}</p>
-                <div className="absolute bottom-0 p-4 w-full bg-black bg-opacity-50 text-white text-lg">
-                  Click to see Meaning
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p>No flashcards due for review</p>
         )}
       </div>
 
-      
+      {/* Flashcards */} 
+<div className="flex justify-center items-center px-4 py-12">
+  {flashcards.length > 0 ? (
+    <div
+      key={flashcards[currentCardIndex]._id}
+      className="w-[350px] md:w-[450px] lg:w-[550px] p-8 rounded-2xl shadow-lg transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500"
+      onClick={() => handleCardClick(flashcards[currentCardIndex]._id)}
+    >
+      {flippedCard === flashcards[currentCardIndex]._id ? (
+        <div className="flex flex-col items-center justify-center text-center text-white">
+          <p className="text-lg md:text-xl font-semibold mb-6">{flashcards[currentCardIndex].answer}</p>
+          <div className="flex gap-6 justify-center w-full">
+            <button
+              onClick={() => handleAnswer(flashcards[currentCardIndex]._id, true)}
+              className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition-all transform hover:scale-105"
+            >
+              I know it
+            </button>
+            <button
+              onClick={() => handleAnswer(flashcards[currentCardIndex]._id, false)}
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-lg transition-all transform hover:scale-105"
+            >
+              I don't know it
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative h-[250px] flex flex-col items-center justify-center text-center text-white">
+          <p className="text-2xl md:text-3xl font-semibold mb-4">{flashcards[currentCardIndex].question}</p>
+          <div className="absolute bottom-0 p-4 w-full bg-black bg-opacity-50 text-lg text-center">Click to see Answer</div>
+        </div>
+      )}
+    </div>
+  ) : (
+    <p className="text-2xl font-semibold text-gray-300">No flashcards due for review</p>
+  )}
+</div>
 
-        {/* Progress Bars */}
-        <div className="mb-8 mx-16">
-        <p>Today's Due Flashcards: {totalFlashcards} words</p>
-        <p>Attempted: {attemptedCount} out of {totalFlashcards}</p>
-        <div className="w-full bg-gray-700 h-4 mb-4">
-          <div className="bg-blue-500 h-full" style={{ width: `${attemptedPercentage}%` }}></div>
+
+      {/* Progress Bars */}
+      <div className="px-8 py-12 bg-gray-800 rounded-xl mx-auto mb-16 max-w-5xl">
+        <p className="text-2xl font-semibold text-white mb-4">Today's Due Flashcards: {totalFlashcards}</p>
+        
+        <div className="mb-6">
+          <p className="text-lg">Attempted: {attemptedCount} out of {totalFlashcards}</p>
+          <div className="w-full bg-gray-600 h-4 rounded-lg mb-4">
+            <div className="bg-blue-600 h-full" style={{ width: `${attemptedPercentage}%` }}></div>
+          </div>
         </div>
 
-        <p>Known: {knownCount} out of {totalFlashcards}</p>
-        <div className="w-full bg-gray-700 h-4 mb-4">
-          <div className="bg-green-500 h-full" style={{ width: `${knownPercentage}%` }}></div>
+        <div className="mb-6">
+          <p className="text-lg">Known: {knownCount} out of {totalFlashcards}</p>
+          <div className="w-full bg-gray-600 h-4 rounded-lg mb-4">
+            <div className="bg-green-600 h-full" style={{ width: `${knownPercentage}%` }}></div>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-lg">Don't Know: {dontKnowCount} out of {totalFlashcards}</p>
+          <div className="w-full bg-gray-600 h-4 rounded-lg">
+            <div className="bg-red-600 h-full" style={{ width: `${dontKnowPercentage}%` }}></div>
+          </div>
         </div>
       </div>
     </div>

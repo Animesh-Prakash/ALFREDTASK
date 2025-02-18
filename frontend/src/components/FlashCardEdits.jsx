@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react"; 
+import axios from "axios"; 
 import { useParams, useNavigate } from "react-router-dom";
 
 const FlashCardEdits = () => {
@@ -8,24 +8,30 @@ const FlashCardEdits = () => {
   const [flashcard, setFlashcard] = useState({
     question: "",
     answer: "",
+    level: "",  // Add level in the initial state
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);  // Add loading state
 
   useEffect(() => {
-    const fetchFlashcard = async () => {
+    const fetchFlashcards = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/flashcards/all/${id}`);
-        setFlashcard(response.data);
-        console.log(response.data);
+        const response = await axios.get("http://localhost:5000/api/flashcards/all");
+        
+        // Find the flashcard by comparing IDs
+        const selectedFlashcard = response.data.find((card) => card._id === id);
+        if (selectedFlashcard) {
+          setFlashcard(selectedFlashcard);
+        }
+        
         setLoading(false);  // Set loading to false after data is fetched
       } catch (err) {
-        console.error("Error fetching flashcard:", err);
+        console.error("Error fetching flashcards:", err);
         setError("Failed to fetch flashcard data.");
         setLoading(false);  // Stop loading if there's an error
       }
     };
-    fetchFlashcard();
+    fetchFlashcards();
   }, [id]);
 
   // Handle form submission
@@ -36,6 +42,7 @@ const FlashCardEdits = () => {
       const response = await axios.put(`http://localhost:5000/api/flashcards/update/${id}`, {
         question: flashcard.question,
         answer: flashcard.answer,
+        level: flashcard.level,  // Include level in the update
       });
 
       if (response.status === 200) {
@@ -50,47 +57,61 @@ const FlashCardEdits = () => {
 
   // Show loading spinner or form based on loading state
   if (loading) {
-    return <p>Loading...</p>;
+    return <p className="text-center text-white">Loading...</p>;
   }
 
   return (
-    <div className="text-white">
-      <h1 className="text-4xl font-bold text-center mb-8">Edit Flashcard</h1>
-      
-      {error && <p className="text-red-500">{error}</p>}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-600 via-purple-700 to-pink-500 p-4">
+      <div className="w-full max-w-lg bg-gray-800 text-white rounded-xl shadow-lg p-8">
+        <h1 className="text-3xl font-bold text-center mb-6">Edit Flashcard</h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col items-center">
-        <div className="mb-4">
-          <label className="block text-lg mb-2" htmlFor="question">Question</label>
-          <input
-            type="text"
-            id="question"
-            value={flashcard.question}
-            onChange={(e) => setFlashcard({ ...flashcard, question: e.target.value })}
-            className="bg-gray-700 text-white p-2 rounded"
-            required
-          />
-        </div>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-        <div className="mb-4">
-          <label className="block text-lg mb-2" htmlFor="answer">Answer</label>
-          <input
-            type="text"
-            id="answer"
-            value={flashcard.answer}
-            onChange={(e) => setFlashcard({ ...flashcard, answer: e.target.value })}
-            className="bg-gray-700 text-white p-2 rounded"
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="question" className="block text-lg mb-2">Question</label>
+            <input
+              type="text"
+              id="question"
+              value={flashcard.question}
+              onChange={(e) => setFlashcard({ ...flashcard, question: e.target.value })}
+              className="w-full p-3 bg-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
 
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Save Changes
-        </button>
-      </form>
+          <div>
+            <label htmlFor="answer" className="block text-lg mb-2">Answer</label>
+            <input
+              type="text"
+              id="answer"
+              value={flashcard.answer}
+              onChange={(e) => setFlashcard({ ...flashcard, answer: e.target.value })}
+              className="w-full p-3 bg-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="level" className="block text-lg mb-2">Level</label>
+            <input
+              type="number"
+              id="level"
+              value={flashcard.level}
+              onChange={(e) => setFlashcard({ ...flashcard, level: e.target.value })}
+              className="w-full p-3 bg-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-500 via-teal-600 to-indigo-700 text-white font-semibold py-3 rounded-md hover:scale-105 transition-all"
+          >
+            Save Changes
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

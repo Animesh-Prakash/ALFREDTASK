@@ -1,4 +1,6 @@
 @import "tailwindcss";
 body{
-  background-color: #12011c;
+  background: linear-gradient(to right, #4f46e5, #7c3aed, #ec4899); /* Equivalent to the Tailwind gradient */
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
 }
