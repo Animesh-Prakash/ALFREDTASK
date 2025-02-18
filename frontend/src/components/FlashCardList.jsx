@@ -108,10 +108,10 @@ const FlashcardList = () => {
       {/* Navbar */}
       <nav className="w-full bg-gray-900 p-6 fixed top-0 left-0 right-0 z-10 shadow-xl rounded-b-lg">
   <div className="flex justify-between items-center max-w-7xl mx-auto">
-    <Link to="/" className="text-white text-3xl font-semibold tracking-wide hover:text-pink-300 transition-all">
+    <Link to="/" className="text-white text-3xl font-semibold tracking-wide hover:text-pink-300 transition-all hidden sm:block">
       Flashcard Master
     </Link>
-    <div className="space-x-6">
+    <div className="space-x-6 flex justify-between items-center w-full sm:w-auto">
       <Link
         to="/login"
         className="text-white bg-gradient-to-r from-teal-500 via-blue-600 to-indigo-700 py-2 px-6 rounded-lg hover:scale-105 transform transition-all font-semibold text-lg"
@@ -133,15 +133,22 @@ const FlashcardList = () => {
         <h1 className="text-5xl font-extrabold mb-8">Your Flashcards</h1>
 
         {email === "animeshp1607@gmail.com" && (
-          <div className="mb-12">
-            <Link to="/add" className="text-xl text-pink-400 hover:text-pink-500 transition-all">
-              Add a new card
-            </Link>
-            <span className="mx-4 text-white">|</span>
-            <Link to="/delete" className="text-xl text-pink-400 hover:text-pink-500 transition-all">
-              Edit your flashcards
-            </Link>
-          </div>
+       <div className="mb-12 flex justify-center items-center space-x-6 flex-wrap sm:flex-nowrap">
+       <Link
+         to="/add"
+         className="text-xl text-white bg-pink-500 hover:bg-pink-600 py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+       >
+         Add a new card
+       </Link>
+       <Link
+         to="/delete"
+         className="text-xl text-white bg-blue-500 hover:bg-blue-600 py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+       >
+         Edit your flashcards
+       </Link>
+     </div>
+     
+        
         )}
       </div>
 
