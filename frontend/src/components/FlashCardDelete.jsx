@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"; 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 const FlashCardDelete = () => {
   const [flashcards, setFlashcards] = useState([]);
@@ -34,7 +35,9 @@ const FlashCardDelete = () => {
   };
 
   return (
-    <div className="text-white">
+    <>
+    <Navbar/>
+    <div className="text-white mt-40 mb-5 mx-3">
       <h1 className="text-4xl font-bold text-center mb-8">All Flashcards</h1>
 
       <div className="grid grid-cols-1 gap-8 justify-items-center">
@@ -71,6 +74,7 @@ const FlashCardDelete = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

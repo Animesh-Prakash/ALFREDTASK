@@ -9,6 +9,7 @@ import FlashCardDelete from './components/FlashCardDelete';
 import FlashCardEdit from './components/FlashCardEdits';
 import AdminDashboard from './components/AdminDashboard';
 import { AuthProvider } from './components/AuthContext';
+import Home from './components/Home';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -27,7 +28,7 @@ function App() {
         <Routes>
           <Route 
             path="/" 
-            element={ <FlashcardList /> } 
+            element={ <Home /> } 
           />
           
           <Route 

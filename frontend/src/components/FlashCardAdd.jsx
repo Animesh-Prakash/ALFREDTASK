@@ -1,5 +1,6 @@
 import React, { useState } from 'react';  
 import axios from 'axios'; 
+import Navbar from './Navbar';
 
 const FlashCardAdd = () => {
   const [question, setQuestion] = useState('');
@@ -42,7 +43,9 @@ const FlashCardAdd = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-8 bg-gray-800 rounded-lg shadow-lg text-white">
+    <>
+    <Navbar/>
+    <div className="max-w-lg mx-3 sm:mx-auto p-8 bg-gray-800 rounded-lg shadow-lg text-white mt-40 mb-6">
       <h1 className="text-3xl font-bold text-center mb-6">Add a New Flashcard</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -90,6 +93,7 @@ const FlashCardAdd = () => {
         </button>
       </form>
     </div>
+    </>
   );
 };
 
